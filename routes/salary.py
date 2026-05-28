@@ -79,28 +79,3 @@ def mark_paid(sal_id):
     flash('Salary marked as Paid.', 'success')
     return redirect(url_for('salary.index'))
 
-
-@salary_bp.route('/delete/<int:sal_id>', methods=['POST'])
-@login_required
-def delete(sal_id):
-    sal = Salary.query.get_or_404(sal_id)
-    db.session.delete(sal)
-    db.session.commit()
-    flash('Salary record deleted.', 'success')
-    return redirect(url_for('salary.index'))
-
-
-@salary_bp.route('/slip/<int:sal_id>')
-@login_required
-def slip(sal_id):
-    sal = Salary.query.get_or_404(sal_id)
-    return render_template('salary/slip.html', salary=sal, faculty=sal.faculty)
-
-
-def _parse_date(val):
-    if not val:
-        return None
-    try:
-        return datetime.strptime(val, '%Y-%m-%d').date()
-    except ValueError:
-        return None
