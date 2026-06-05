@@ -54,3 +54,11 @@ def edit(rev_id):
     return redirect(url_for('performance.index'))
 
 
+@performance_bp.route('/delete/<int:rev_id>', methods=['POST'])
+@login_required
+def delete(rev_id):
+    rev = PerformanceReview.query.get_or_404(rev_id)
+    db.session.delete(rev)
+    db.session.commit()
+    flash('Review deleted.', 'success')
+    return redirect(url_for('performance.index'))
