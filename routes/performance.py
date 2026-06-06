@@ -40,3 +40,25 @@ def add():
     flash('Performance review added.', 'success')
     return redirect(url_for('performance.index'))
 
+
+@performance_bp.route('/edit/<int:rev_id>', methods=['POST'])
+@login_required
+def edit(rev_id):
+    rev = PerformanceReview.query.get_or_404(rev_id)
+    rev.faculty_id  = request.form.get('faculty_id')
+    rev.review_year = request.form.get('review_year')
+    rev.rating      = request.form.get('rating')
+    rev.remarks     = request.form.get('remarks', '').strip() or None
+    db.session.commit()
+    flash('Review updated.', 'success')
+    return redirect(url_for('performance.index'))
+
+
+@performance_bp.route('/delete/<int:rev_id>', methods=['POST'])
+@login_required
+def delete(rev_id):
+    rev = PerformanceReview.query.get_or_404(rev_id)
+    db.session.delete(rev)
+    db.session.commit()
+    flash('Review deleted.', 'success')
+    return redirect(url_for('performance.index'))
