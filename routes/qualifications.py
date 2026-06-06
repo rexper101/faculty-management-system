@@ -45,13 +45,3 @@ def edit(qual_id):
     flash('Qualification updated.', 'success')
     return redirect(url_for('qualifications.index', faculty_id=q.faculty_id))
 
-
-@qualifications_bp.route('/delete/<int:qual_id>', methods=['POST'])
-@login_required
-def delete(qual_id):
-    q = Qualification.query.get_or_404(qual_id)
-    fid = q.faculty_id
-    db.session.delete(q)
-    db.session.commit()
-    flash('Qualification deleted.', 'success')
-    return redirect(url_for('qualifications.index', faculty_id=fid))
