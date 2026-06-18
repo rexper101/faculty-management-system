@@ -48,5 +48,23 @@ def setup():
         flash('Setup already completed.', 'info')
         return redirect(url_for('auth.login'))
 
+    if request.method == 'POST':
+        username = request.form.get('username', '').strip()
+        password = request.form.get('password', '')
+        confirm  = request.form.get('confirm_password', '')
+
+        if not username or not password:
+            flash('All fields are required.', 'danger')
+        elif password != confirm:
+            flash('Passwords do not match.', 'danger')
+        elif len(password) < 6:
+            flash('Password must be at least 6 characters.', 'danger')
+        else:
+            admin = AdminUser(username=username)
+            admin.set_password(password)
+            db.session.add(admin)
+            db.session.commit()
+            flash('Admin account created! Please login.', 'success')
+            return redirect(url_for('auth.login'))
 
     return render_template('setup.html')
