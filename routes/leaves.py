@@ -78,11 +78,3 @@ def review(leave_id):
     return redirect(url_for('leaves.index'))
 
 
-@leaves_bp.route('/delete/<int:leave_id>', methods=['POST'])
-@login_required
-def delete(leave_id):
-    lr = LeaveRequest.query.get_or_404(leave_id)
-    db.session.delete(lr)
-    db.session.commit()
-    flash('Leave request deleted.', 'success')
-    return redirect(url_for('leaves.index'))
