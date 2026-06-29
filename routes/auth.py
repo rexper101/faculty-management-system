@@ -32,39 +32,3 @@ def login():
 
     return render_template('login.html')
 
-
-@auth_bp.route('/logout')
-@login_required
-def logout():
-    logout_user()
-    flash('You have been logged out successfully.', 'info')
-    return redirect(url_for('auth.login'))
-
-
-@auth_bp.route('/setup', methods=['GET', 'POST'])
-def setup():
-    """One-time setup to create the first admin user."""
-    if AdminUser.query.count() > 0:
-        flash('Setup already completed.', 'info')
-        return redirect(url_for('auth.login'))
-
-    if request.method == 'POST':
-        username = request.form.get('username', '').strip()
-        password = request.form.get('password', '')
-        confirm  = request.form.get('confirm_password', '')
-
-        if not username or not password:
-            flash('All fields are required.', 'danger')
-        elif password != confirm:
-            flash('Passwords do not match.', 'danger')
-        elif len(password) < 6:
-            flash('Password must be at least 6 characters.', 'danger')
-        else:
-            admin = AdminUser(username=username)
-            admin.set_password(password)
-            db.session.add(admin)
-            db.session.commit()
-            flash('Admin account created! Please login.', 'success')
-            return redirect(url_for('auth.login'))
-
-    return render_template('setup.html')
