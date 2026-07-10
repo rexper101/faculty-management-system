@@ -72,3 +72,19 @@ def download(doc_id):
                                download_name=doc.document_name)
 
 
+@documents_bp.route('/delete/<int:doc_id>', methods=['POST'])
+@login_required
+def delete(doc_id):
+    doc = Document.query.get_or_404(doc_id)
+    fid = doc.faculty_id
+    # Delete physical file
+    try:
+        path = os.path.join(current_app.config['UPLOAD_FOLDER'], doc.file_path)
+        if os.path.exists(path):
+            os.remove(path)
+    except Exception:
+        pass
+    db.session.delete(doc)
+    db.session.commit()
+    flash('Document deleted.', 'success')
+    return redirect(url_for('documents.index', faculty_id=fid))
