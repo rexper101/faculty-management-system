@@ -80,13 +80,3 @@ def mark():
         db.session.rollback()
         flash('Error marking attendance (duplicate entry?).', 'danger')
     return redirect(url_for('attendance.index'))
-
-
-@attendance_bp.route('/delete/<int:att_id>', methods=['POST'])
-@login_required
-def delete(att_id):
-    att = Attendance.query.get_or_404(att_id)
-    db.session.delete(att)
-    db.session.commit()
-    flash('Attendance record deleted.', 'success')
-    return redirect(url_for('attendance.index'))
