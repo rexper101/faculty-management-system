@@ -41,3 +41,14 @@ def edit(pub_id):
     db.session.commit()
     flash('Publication updated.', 'success')
     return redirect(url_for('publications.index', faculty_id=pub.faculty_id))
+
+
+@publications_bp.route('/delete/<int:pub_id>', methods=['POST'])
+@login_required
+def delete(pub_id):
+    pub = ResearchPublication.query.get_or_404(pub_id)
+    fid = pub.faculty_id
+    db.session.delete(pub)
+    db.session.commit()
+    flash('Publication deleted.', 'success')
+    return redirect(url_for('publications.index', faculty_id=fid))
