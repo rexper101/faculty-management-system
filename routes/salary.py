@@ -93,14 +93,4 @@ def delete(sal_id):
 @salary_bp.route('/slip/<int:sal_id>')
 @login_required
 def slip(sal_id):
-    sal = Salary.query.get_or_404(sal_id)
-    return render_template('salary/slip.html', salary=sal, faculty=sal.faculty)
 
-
-def _parse_date(val):
-    if not val:
-        return None
-    try:
-        return datetime.strptime(val, '%Y-%m-%d').date()
-    except ValueError:
-        return None
