@@ -163,3 +163,11 @@
     </form>
   </div>
 </div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+// Set today's date as default
+document.querySelector('[name="attendance_date"]').value = new Date().toISOString().split('T')[0];
+</script>
+{% endblock %}
