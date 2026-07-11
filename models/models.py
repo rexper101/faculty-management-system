@@ -184,4 +184,4 @@ class LeaveRequest(db.Model):
     reviewed_at     = db.Column(db.DateTime)
     applied_at      = db.Column(db.DateTime, default=datetime.utcnow)
 
-    
+    reviewer = db.relationship('AdminUser', backref='reviewed_leaves')
