@@ -28,7 +28,7 @@
         </div>
         <div class="progress" style="height:6px">
           <div class="progress-bar bg-{{ 'success' if avg >= 4 else ('warning' if avg >= 3 else 'danger') }}"
-               style="width:{{ (avg / 5 * 100)|int }}%"></div>
+               data-width="{{ (avg / 5 * 100)|int }}"></div>
         </div>
         <div class="text-muted small mt-1">avg rating / 5</div>
       </div>
@@ -61,7 +61,7 @@
               <div class="d-flex align-items-center gap-2">
                 <div class="progress flex-grow-1" style="height:6px;max-width:80px">
                   <div class="progress-bar bg-{{ 'success' if rev.rating >= 4 else ('warning' if rev.rating >= 3 else 'danger') }}"
-                       style="width:{{ (rev.rating / 5 * 100)|int }}%"></div>
+                       data-width="{{ (rev.rating / 5 * 100)|int }}"></div>
                 </div>
                 <span class="fw-semibold small">{{ rev.rating }}/5</span>
                 {% for i in range(5) %}
@@ -73,9 +73,13 @@
             <td>
               <div class="d-flex gap-1">
                 <button class="btn btn-xs btn-outline-primary"
-                        onclick="openEdit({{ rev.review_id }}, {{ rev.faculty_id }},
-                          {{ rev.review_year }}, {{ rev.rating }},
-                          `{{ rev.remarks or '' }}`)">
+                        type="button"
+                        data-review-id="{{ rev.review_id }}"
+                        data-faculty-id="{{ rev.faculty_id }}"
+                        data-review-year="{{ rev.review_year }}"
+                        data-rating="{{ rev.rating }}"
+                        data-remarks="{{ rev.remarks|e }}"
+                        onclick="openEdit(this)">
                   <i class="bi bi-pencil-fill"></i>
                 </button>
                 <form method="POST" action="{{ url_for('performance.delete', rev_id=rev.review_id) }}"
@@ -179,13 +183,28 @@
 
 {% block extra_js %}
 <script>
-function openEdit(id, facId, year, rating, remarks) {
-  document.getElementById('editForm').action    = `/performance/edit/${id}`;
-  document.getElementById('editFaculty').value  = facId;
-  document.getElementById('editYear').value     = year;
-  document.getElementById('editRating').value   = rating;
-  document.getElementById('editRemarks').value  = remarks;
+function openEdit(button) {
+  const id = button.dataset.reviewId;
+  const facId = button.dataset.facultyId;
+  const year = button.dataset.reviewYear;
+  const rating = button.dataset.rating;
+  const remarks = button.dataset.remarks || '';
+
+  document.getElementById('editForm').action = `/performance/edit/${id}`;
+  document.getElementById('editFaculty').value = facId;
+  document.getElementById('editYear').value = year;
+  document.getElementById('editRating').value = rating;
+  document.getElementById('editRemarks').value = remarks;
   new bootstrap.Modal(document.getElementById('editModal')).show();
 }
+
+document.addEventListener('DOMContentLoaded', () => {
+  document.querySelectorAll('.progress-bar[data-width]').forEach((bar) => {
+    const width = bar.getAttribute('data-width');
+    if (width !== null) {
+      bar.style.width = `${width}%`;
+    }
+  });
+});
 </script>
 {% endblock %}
