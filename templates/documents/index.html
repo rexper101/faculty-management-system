@@ -135,3 +135,16 @@ fileInput.addEventListener('change', () => {
     fileInput.files[0] ? fileInput.files[0].name : 'No file selected';
 });
 
+['dragover', 'dragleave', 'drop'].forEach(evt => {
+  dropZone.addEventListener(evt, e => {
+    e.preventDefault();
+    dropZone.classList.toggle('dragover', evt === 'dragover');
+    if (evt === 'drop') {
+      fileInput.files = e.dataTransfer.files;
+      document.getElementById('fileNameDisplay').textContent =
+        e.dataTransfer.files[0]?.name || 'No file selected';
+    }
+  });
+});
+</script>
+{% endblock %}
