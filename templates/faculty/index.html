@@ -82,7 +82,7 @@
               <div class="d-flex align-items-center gap-2">
                 <div class="avatar-sm">
                   {% if fac.profile_image %}
-                  <img src="{{ url_for('static', filename='../uploads/' + fac.profile_image) }}"
+                  <img src="{{ url_for('faculty.uploaded_file', filename=fac.profile_image) }}"
                        class="avatar-img" alt="">
                   {% else %}
                   <span class="avatar-text">{{ fac.first_name[0] }}{{ fac.last_name[0] }}</span>

@@ -28,7 +28,7 @@
       <div class="col-auto">
         <div class="profile-avatar">
           {% if faculty.profile_image %}
-          <img src="{{ url_for('static', filename='../uploads/' + faculty.profile_image) }}"
+          <img src="{{ url_for('faculty.uploaded_file', filename=faculty.profile_image) }}"
                alt="{{ faculty.full_name }}" class="profile-avatar-img">
           {% else %}
           <div class="profile-avatar-placeholder">

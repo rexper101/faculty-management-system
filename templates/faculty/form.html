@@ -29,7 +29,7 @@
             <div class="profile-preview mb-2" id="previewContainer">
               {% if faculty and faculty.profile_image %}
               <img id="profilePreview"
-                   src="{{ url_for('static', filename='../uploads/' + faculty.profile_image) }}"
+                   src="{{ url_for('faculty.uploaded_file', filename=faculty.profile_image) }}"
                    alt="Profile" class="profile-avatar-img" style="width:80px;height:80px;object-fit:cover;border-radius:50%">
               {% else %}
               <div id="profilePlaceholder" class="profile-avatar-placeholder" style="width:80px;height:80px;font-size:1.5rem;margin:auto">

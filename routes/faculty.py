@@ -1,6 +1,6 @@
 import os, csv, io
 from flask import (Blueprint, render_template, redirect, url_for, request,
-                   flash, current_app, send_file, make_response)
+                   flash, current_app, send_from_directory, make_response)
 from flask_login import login_required
 from werkzeug.utils import secure_filename
 from models.models import Faculty, Department
@@ -10,6 +10,9 @@ from datetime import datetime
 faculty_bp = Blueprint('faculty', __name__, url_prefix='/faculty')
 
 ALLOWED = {'png', 'jpg', 'jpeg', 'gif', 'webp'}
+GENDERS = {'Male', 'Female', 'Other'}
+EMPLOYMENT_TYPES = {'Full-Time', 'Part-Time', 'Contract', 'Visiting'}
+STATUSES = {'Active', 'Inactive'}
 
 
 def allowed_image(filename):
@@ -23,6 +26,63 @@ def save_profile_image(file, faculty_id):
     os.makedirs(folder, exist_ok=True)
     file.save(os.path.join(folder, filename))
     return f'profiles/{filename}'
+
+
+@faculty_bp.route('/uploads/<path:filename>')
+@login_required
+def uploaded_file(filename):
+    """Serve private faculty photos only to authenticated administrators."""
+    return send_from_directory(current_app.config['UPLOAD_FOLDER'], filename)
+
+
+def _validate_faculty_form(form, faculty_id=None):
+    """Validate values that could otherwise cause DB errors or invalid records."""
+    errors = []
+    first_name = form.get('first_name', '').strip()
+    last_name = form.get('last_name', '').strip()
+    employee_code = form.get('employee_code', '').strip().upper()
+    email = form.get('email', '').strip() or None
+
+    if not first_name or not last_name or not employee_code:
+        errors.append('First name, last name and employee code are required.')
+
+    if employee_code:
+        duplicate_code = Faculty.query.filter_by(employee_code=employee_code).first()
+        if duplicate_code and duplicate_code.faculty_id != faculty_id:
+            errors.append('Employee code already exists.')
+
+    if email:
+        duplicate_email = Faculty.query.filter_by(email=email).first()
+        if duplicate_email and duplicate_email.faculty_id != faculty_id:
+            errors.append('Email address already belongs to another faculty member.')
+
+    gender = form.get('gender') or None
+    if gender and gender not in GENDERS:
+        errors.append('Select a valid gender.')
+    employment_type = form.get('employment_type', 'Full-Time')
+    if employment_type not in EMPLOYMENT_TYPES:
+        errors.append('Select a valid employment type.')
+    status = form.get('status', 'Active')
+    if status not in STATUSES:
+        errors.append('Select a valid faculty status.')
+
+    department_value = form.get('department_id', '').strip()
+    department_id = None
+    if department_value:
+        try:
+            department_id = int(department_value)
+        except ValueError:
+            errors.append('Select a valid department.')
+        else:
+            if not Department.query.filter_by(department_id=department_id).first():
+                errors.append('The selected department does not exist.')
+
+    for field, label in (('date_of_birth', 'Date of birth'), ('joining_date', 'Joining date')):
+        value = form.get(field, '').strip()
+        if value and _parse_date(value) is None:
+            errors.append(f'{label} must be a valid date.')
+
+    return errors, department_id
 
 
 @faculty_bp.route('/')
@@ -46,7 +106,10 @@ def index():
             )
         )
     if dept_id:
-        query = query.filter_by(department_id=int(dept_id))
+        try:
+            query = query.filter_by(department_id=int(dept_id))
+        except ValueError:
+            dept_id = ''
     if status:
         query = query.filter_by(status=status)
 
@@ -68,19 +131,18 @@ def add():
 
     if request.method == 'POST':
         f = request.form
-        # Basic validation
-        if not f.get('first_name') or not f.get('last_name') or not f.get('employee_code'):
-            flash('First name, last name and employee code are required.', 'danger')
-            return render_template('faculty/form.html', action='Add', faculty=None,
-                                   departments=departments)
-
-        if Faculty.query.filter_by(employee_code=f['employee_code'].strip()).first():
-            flash('Employee code already exists.', 'danger')
+        errors, department_id = _validate_faculty_form(f)
+        img = request.files.get('profile_image')
+        if img and img.filename and not allowed_image(img.filename):
+            errors.append('Profile photos must be PNG, JPG, GIF or WebP images.')
+        if errors:
+            for error in errors:
+                flash(error, 'danger')
             return render_template('faculty/form.html', action='Add', faculty=None,
                                    departments=departments)
 
         fac = Faculty(
-            employee_code   = f['employee_code'].strip(),
+            employee_code   = f['employee_code'].strip().upper(),
             first_name      = f['first_name'].strip(),
             last_name       = f['last_name'].strip(),
             gender          = f.get('gender') or None,
@@ -96,14 +158,13 @@ def add():
             joining_date    = _parse_date(f.get('joining_date')),
             designation     = f.get('designation', '').strip() or None,
             employment_type = f.get('employment_type', 'Full-Time'),
-            department_id   = int(f['department_id']) if f.get('department_id') else None,
+            department_id   = department_id,
             status          = f.get('status', 'Active'),
         )
         db.session.add(fac)
         db.session.flush()  # get faculty_id before commit
 
         # Profile image
-        img = request.files.get('profile_image')
         if img and img.filename and allowed_image(img.filename):
             fac.profile_image = save_profile_image(img, fac.faculty_id)
 
@@ -130,19 +191,17 @@ def edit(faculty_id):
 
     if request.method == 'POST':
         f = request.form
-        if not f.get('first_name') or not f.get('last_name'):
-            flash('First name and last name are required.', 'danger')
+        errors, department_id = _validate_faculty_form(f, faculty_id=faculty_id)
+        img = request.files.get('profile_image')
+        if img and img.filename and not allowed_image(img.filename):
+            errors.append('Profile photos must be PNG, JPG, GIF or WebP images.')
+        if errors:
+            for error in errors:
+                flash(error, 'danger')
             return render_template('faculty/form.html', action='Edit', faculty=fac,
                                    departments=departments)
 
-        code = f['employee_code'].strip()
-        existing = Faculty.query.filter_by(employee_code=code).first()
-        if existing and existing.faculty_id != faculty_id:
-            flash('Employee code already exists.', 'danger')
-            return render_template('faculty/form.html', action='Edit', faculty=fac,
-                                   departments=departments)
-
-        fac.employee_code   = code
+        fac.employee_code   = f['employee_code'].strip().upper()
         fac.first_name      = f['first_name'].strip()
         fac.last_name       = f['last_name'].strip()
         fac.gender          = f.get('gender') or None
@@ -158,10 +217,9 @@ def edit(faculty_id):
         fac.joining_date    = _parse_date(f.get('joining_date'))
         fac.designation     = f.get('designation', '').strip() or None
         fac.employment_type = f.get('employment_type', 'Full-Time')
-        fac.department_id   = int(f['department_id']) if f.get('department_id') else None
+        fac.department_id   = department_id
         fac.status          = f.get('status', 'Active')
 
-        img = request.files.get('profile_image')
         if img and img.filename and allowed_image(img.filename):
             fac.profile_image = save_profile_image(img, fac.faculty_id)
 
