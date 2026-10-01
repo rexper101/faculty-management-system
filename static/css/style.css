@@ -287,6 +287,16 @@ body {
 .page-title { letter-spacing: -.025em; }
 .page-content { max-width: 1680px; width: 100%; margin-inline: auto; }
 
+.sidebar-overlay {
+  display: none;
+  position: fixed;
+  inset: 0;
+  z-index: 990;
+  background: rgba(15, 23, 42, .45);
+  opacity: 0;
+  transition: opacity .2s ease;
+}
+
 @media (max-width: 767.98px) {
   .page-content { padding-inline: 1rem !important; }
   .flash-area { padding-inline: 1rem !important; }
@@ -295,6 +305,13 @@ body {
   .stat-card { padding: 13px; gap: 10px; }
   .stat-icon { width: 42px; height: 42px; }
   .table td, .table th { padding: 9px 10px; }
+}
+
+@media (max-width: 991.98px) {
+  .sidebar { transform: translateX(-100%); }
+  .sidebar.open { transform: translateX(0); }
+  .main-wrapper { margin-left: 0; }
+  .sidebar-overlay.show { display: block; opacity: 1; }
 }
 
 @media (prefers-reduced-motion: reduce) {
