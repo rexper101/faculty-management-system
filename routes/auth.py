@@ -2,6 +2,7 @@ from flask import Blueprint, render_template, redirect, url_for, request, flash
 from flask_login import login_user, logout_user, login_required, current_user
 from models.models import AdminUser
 from app import db
+from urllib.parse import urlsplit
 
 auth_bp = Blueprint('auth', __name__)
 
@@ -25,6 +26,12 @@ def login():
         if user and user.check_password(password):
             login_user(user, remember=remember)
             next_page = request.args.get('next')
+            if next_page:
+                parsed_next = urlsplit(next_page)
+                if (parsed_next.scheme or parsed_next.netloc
+                        or not next_page.startswith('/')
+                        or next_page.startswith('//') or '\\' in next_page):
+                    next_page = None
             flash(f'Welcome back, {user.username}!', 'success')
             return redirect(next_page or url_for('dashboard.index'))
 
