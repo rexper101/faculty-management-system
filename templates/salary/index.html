@@ -105,14 +105,16 @@
                 </a>
                 {% if sal.salary_status == 'Pending' %}
                 <form method="POST" action="{{ url_for('salary.mark_paid', sal_id=sal.salary_id) }}"
-                      onsubmit="return confirm('Mark this salary as Paid?')">
+                        onsubmit="return confirm('Mark this salary as Paid?')">
+                      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
                   <button class="btn btn-xs btn-outline-success" title="Mark Paid">
                     <i class="bi bi-check-circle-fill"></i>
                   </button>
                 </form>
                 {% endif %}
                 <form method="POST" action="{{ url_for('salary.delete', sal_id=sal.salary_id) }}"
-                      onsubmit="return confirm('Delete this salary record?')">
+                        onsubmit="return confirm('Delete this salary record?')">
+                      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
                   <button class="btn btn-xs btn-outline-danger" title="Delete">
                     <i class="bi bi-trash-fill"></i>
                   </button>
@@ -135,6 +137,7 @@
 <div class="modal fade" id="addModal" tabindex="-1">
   <div class="modal-dialog">
     <form method="POST" action="{{ url_for('salary.add') }}" class="modal-content" id="salaryForm">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
       <div class="modal-header"><h5 class="modal-title">Add Salary Record</h5>
         <button type="button" class="btn-close" data-bs-dismiss="modal"></button></div>
       <div class="modal-body">

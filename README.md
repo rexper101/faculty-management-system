@@ -49,8 +49,12 @@ pip install -r requirements.txt
 ### 3. Configure environment
 ```bash
 cp .env.example .env
-# Edit .env with your MySQL credentials and SECRET_KEY
+# Set DB_HOST, DB_PORT, DB_USER, DB_PASSWORD and DB_NAME in .env
+# Generate a key with: python -c "import secrets; print(secrets.token_hex(32))"
+# Put the generated value in SECRET_KEY in .env
 ```
+The app will refuse to start with a missing, placeholder, or short `SECRET_KEY`. Keep `.env` private and never commit it.
+The prior database password was embedded in `config.py`; rotate that database password if it was ever used or pushed to a remote repository.
 
 ### 4. Create MySQL database
 ```sql
@@ -121,6 +125,8 @@ faculty_system/
 - Passwords: **PBKDF2-SHA256** (Werkzeug)
 - All routes protected via `@login_required`
 - File uploads: extension + 16 MB size validated
+- State-changing forms are protected by Flask-WTF CSRF tokens
+- Database connection details and the Flask session key are loaded from `.env` / environment variables
 - SQL injection: prevented via SQLAlchemy ORM
 - **Production**: set `DEBUG=False`, strong `SECRET_KEY`, HTTPS
 

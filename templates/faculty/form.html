@@ -17,6 +17,7 @@
 </div>
 
 <form method="POST" enctype="multipart/form-data" id="facultyForm">
+  <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
   <!-- Personal Details -->
   <div class="card shadow-sm mb-3">
     <div class="card-header fw-semibold">

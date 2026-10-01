@@ -114,7 +114,8 @@
                   <i class="bi bi-pencil-fill"></i>
                 </a>
                 <form method="POST" action="{{ url_for('faculty.delete', faculty_id=fac.faculty_id) }}"
-                      onsubmit="return confirm('Delete faculty {{ fac.full_name }}? All records will be removed.')">
+                        onsubmit="return confirm('Delete faculty {{ fac.full_name }}? All records will be removed.')">
+                      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
                   <button class="btn btn-xs btn-outline-danger" title="Delete">
                     <i class="bi bi-trash-fill"></i>
                   </button>

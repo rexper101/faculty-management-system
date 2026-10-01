@@ -1,5 +1,5 @@
 from flask import Flask
-from extensions import db, login_manager
+from extensions import db, login_manager, csrf
 from config import Config
 import os
 
@@ -7,10 +7,14 @@ import os
 def create_app():
     app = Flask(__name__)
     app.config.from_object(Config)
+    secret_key = app.config.get('SECRET_KEY')
+    if not secret_key or len(secret_key) < 32 or secret_key == 'replace-with-a-unique-random-secret':
+        raise RuntimeError('Set a unique SECRET_KEY of at least 32 characters in your environment or .env file.')
 
     os.makedirs(app.config['UPLOAD_FOLDER'], exist_ok=True)
 
     db.init_app(app)
+    csrf.init_app(app)
     login_manager.init_app(app)
     login_manager.login_view = 'auth.login'
     login_manager.login_message = 'Please log in to access this page.'

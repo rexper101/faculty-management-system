@@ -59,7 +59,8 @@
           <i class="bi bi-download me-1"></i>Download
         </a>
         <form method="POST" action="{{ url_for('documents.delete', doc_id=doc.document_id) }}"
-              onsubmit="return confirm('Delete this document?')">
+                onsubmit="return confirm('Delete this document?')">
+              <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
           <button class="btn btn-sm btn-outline-danger">
             <i class="bi bi-trash-fill"></i>
           </button>
@@ -92,7 +93,8 @@
 <div class="modal fade" id="uploadModal" tabindex="-1">
   <div class="modal-dialog">
     <form method="POST" action="{{ url_for('documents.upload', faculty_id=faculty.faculty_id) }}"
-          enctype="multipart/form-data" class="modal-content">
+            enctype="multipart/form-data" class="modal-content">
+          <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
       <div class="modal-header">
         <h5 class="modal-title"><i class="bi bi-upload me-2"></i>Upload Document</h5>
         <button type="button" class="btn-close" data-bs-dismiss="modal"></button>

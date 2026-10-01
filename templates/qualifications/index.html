@@ -46,7 +46,8 @@
                   <i class="bi bi-pencil-fill"></i>
                 </button>
                 <form method="POST" action="{{ url_for('qualifications.delete', qual_id=q.qualification_id) }}"
-                      onsubmit="return confirm('Delete this qualification?')">
+                        onsubmit="return confirm('Delete this qualification?')">
+                      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
                   <button class="btn btn-xs btn-outline-danger"><i class="bi bi-trash-fill"></i></button>
                 </form>
               </div>
@@ -67,6 +68,7 @@
 <div class="modal fade" id="addModal" tabindex="-1">
   <div class="modal-dialog">
     <form method="POST" action="{{ url_for('qualifications.add', faculty_id=faculty.faculty_id) }}" class="modal-content">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
       <div class="modal-header"><h5 class="modal-title">Add Qualification</h5>
         <button type="button" class="btn-close" data-bs-dismiss="modal"></button></div>
       <div class="modal-body">
@@ -93,6 +95,7 @@
 <div class="modal fade" id="editModal" tabindex="-1">
   <div class="modal-dialog">
     <form method="POST" id="editForm" class="modal-content">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
       <div class="modal-header"><h5 class="modal-title">Edit Qualification</h5>
         <button type="button" class="btn-close" data-bs-dismiss="modal"></button></div>
       <div class="modal-body">

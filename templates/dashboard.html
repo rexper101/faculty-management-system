@@ -156,10 +156,12 @@
                 <td>
                   {% if lr.approval_status == 'Pending' %}
                   <form method="POST" action="{{ url_for('leaves.review', leave_id=lr.leave_id) }}" class="d-inline">
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
                     <input type="hidden" name="action" value="approve">
                     <button class="btn btn-xs btn-success me-1">✓</button>
                   </form>
                   <form method="POST" action="{{ url_for('leaves.review', leave_id=lr.leave_id) }}" class="d-inline">
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
                     <input type="hidden" name="action" value="reject">
                     <button class="btn btn-xs btn-danger">✗</button>
                   </form>
